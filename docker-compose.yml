@@ -1,0 +1,9 @@
+services:
+  cardconjurer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "4242:4242"
+    restart: unless-stopped
