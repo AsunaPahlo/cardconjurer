@@ -5094,12 +5094,25 @@ function loadCard(event) {
 			bottomInfoEdited();
 			watermarkEdited();
 			drawTextBuffer();
-			//redraw text after everything settles (scripts, fonts, images)
-			setTimeout(function() {
-				document.fonts.ready.then(function() {
-					drawText();
+			//wait for all images and fonts to load, then redraw text
+			var imagesToWait = [art, setSymbol, watermark];
+			card.frames.forEach(function(frame) {
+				if (frame.image && !frame.image.complete) imagesToWait.push(frame.image);
+				if (frame.masks) frame.masks.forEach(function(mask) {
+					if (mask.image && !mask.image.complete) imagesToWait.push(mask.image);
 				});
-			}, 1000);
+			});
+			var imagePromises = imagesToWait.map(function(img) {
+				if (img.complete) return Promise.resolve();
+				return new Promise(function(resolve) {
+					img.addEventListener('load', resolve, {once: true});
+					img.addEventListener('error', resolve, {once: true});
+				});
+			});
+			Promise.all(imagePromises.concat([document.fonts.ready])).then(function() {
+				drawText();
+				drawCard();
+			});
 			notify('Card loaded successfully!', 3);
 		} else {
 			notify('Card file failed to load.', 5);
