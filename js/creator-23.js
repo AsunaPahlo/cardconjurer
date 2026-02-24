@@ -5086,11 +5086,12 @@ function loadCard(event) {
 				}
 			});
 			if (canvasesResized) {
-				drawTextBuffer();
-				drawFrames();
-				bottomInfoEdited();
-				watermarkEdited();
+				sizeCanvas('card');
 			}
+			drawTextBuffer();
+			drawFrames();
+			bottomInfoEdited();
+			watermarkEdited();
 			notify('Card loaded successfully!', 3);
 		} else {
 			notify('Card file failed to load.', 5);
