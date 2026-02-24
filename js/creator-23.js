@@ -5076,7 +5076,9 @@ function loadCard(event) {
 			if (card.onload) {
 				await loadScript(card.onload);
 			}
-			card.manaSymbols.forEach(item => loadScript(item));
+			for (var item of card.manaSymbols) {
+				await loadScript(item);
+			}
 			//canvases
 			var canvasesResized = false;
 			canvasList.forEach(name => {
@@ -5088,10 +5090,16 @@ function loadCard(event) {
 			if (canvasesResized) {
 				sizeCanvas('card');
 			}
-			drawTextBuffer();
 			drawFrames();
 			bottomInfoEdited();
 			watermarkEdited();
+			drawTextBuffer();
+			//redraw text after everything settles (scripts, fonts, images)
+			setTimeout(function() {
+				document.fonts.ready.then(function() {
+					drawText();
+				});
+			}, 1000);
 			notify('Card loaded successfully!', 3);
 		} else {
 			notify('Card file failed to load.', 5);
@@ -5208,13 +5216,16 @@ async function imageLocal(event, destination, otherParams) {
 	await reader.readAsDataURL(event.target.files[0]);
 }
 function loadScript(scriptPath) {
-	var script = document.createElement('script');
-	script.setAttribute('type', 'text/javascript');
-	script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');}
-	script.setAttribute('src', scriptPath);
-	if (typeof script != 'undefined') {
-		document.querySelectorAll('head')[0].appendChild(script);
-	}
+	return new Promise(function(resolve) {
+		var script = document.createElement('script');
+		script.setAttribute('type', 'text/javascript');
+		script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.'); resolve();}
+		script.onload = function(){ resolve(); }
+		script.setAttribute('src', scriptPath);
+		if (typeof script != 'undefined') {
+			document.querySelectorAll('head')[0].appendChild(script);
+		}
+	});
 }
 // Stretchable SVGs
 function stretchSVG(frameObject) {
