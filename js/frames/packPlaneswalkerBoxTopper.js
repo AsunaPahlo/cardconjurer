@@ -19,7 +19,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	await resetCardIrregularities();
 	//sets card version
 	card.version = 'planeswalkerRegular';
-	card.onload = '/js/frames/versionPlaneswalkerBoxTopper.js';
+	card.onload = '/js/frames/versionPlaneswalker.js';
 	loadScript('/js/frames/versionPlaneswalker.js');
 	//art bounds
 	card.artBounds = {x:0, y:0.0362, width:1, height:0.88};
